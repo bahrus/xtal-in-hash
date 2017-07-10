@@ -1,36 +1,5 @@
-<link rel="import" href="../polymer/polymer-element.html">
-
+<!DOCTYPE html>
+<link async rel="import" href="../poly-prep/poly-prep.html"/>
 <dom-module id="xtal-in-hash">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-    <h2>Hello [[prop1]]!</h2>
-  </template>
-
-  <script>
-    /**
-     * `xtal-in-hash`
-     * Allow location.hash to provide an input channel for web components
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class XtalInHash extends Polymer.Element {
-      static get is() { return 'xtal-in-hash'; }
-      static get properties() {
-        return {
-          prop1: {
-            type: String,
-            value: 'xtal-in-hash'
-          }
-        };
-      }
-    }
-
-    window.customElements.define(XtalInHash.is, XtalInHash);
-  </script>
+    <script src="xtal-in-hash.js"></script>
 </dom-module>
