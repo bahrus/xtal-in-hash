@@ -21,7 +21,7 @@ module xtal.elements{
         *
         * @customElement
         * @polymer
-        * @demo demo/index_sync.html
+        * @demo demo/index.html
         */
         class XtalInHash  extends Polymer.Element implements IXtalInHashProperties{
             bind: boolean;
