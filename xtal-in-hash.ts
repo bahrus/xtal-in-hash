@@ -8,7 +8,7 @@ module xtal.elements{
             set: boolean | polymer.PropObjectType,
             showUsage: boolean | polymer.PropObjectType,
             toFrom: boolean | polymer.PropObjectType,
-            whereUid: string | polymer.PropObjectType,
+            //whereUid: string | polymer.PropObjectType,
         }
         const tagName = 'xtal-in-hash';
         if(customElements.get(tagName)) return;
@@ -31,8 +31,8 @@ module xtal.elements{
             set: boolean;
             showUsage: boolean;
             toFrom: boolean;
-            whereUid: string;
-            static get is(){return tagName;}
+            // whereUid: string;
+            static get is(){return 'xtal-in-hash';}
             static get properties() : IXtalInHashProperties{
                 return {
                     bind: {
@@ -63,36 +63,43 @@ module xtal.elements{
                         type: Boolean,
                         observer: 'onPropsChange'
                     },
-                    /**
-                     * Should be unique for the entire page
-                     */
-                    whereUid:{
-                        type: String
-                    }
+                    
                 }
             }
-             
+            previousHash; 
             onPropsChange(){
-                if(this.set && this.childProps && this.from && this.locationHash && this.whereUid){
-                    window.addEventListener('hashchange', this.setPropsFromLocationHash);
+                if(!this.previousHash) {
+                    this.setPropsFromLocationHash();
+                }
+                if(this.set && this.childProps && this.from && this.locationHash){
+                    const _this = this;
+                    window.addEventListener('hashchange', () =>{
+                        _this.setPropsFromLocationHash();
+                    });
                 }
             }
 
             disconnectedCallback(){
-                window.removeEventListener('hashchange', this.setPropsFromLocationHash);
+                const _this = this;
+                window.removeEventListener('hashchange',() =>{
+                    _this.setPropsFromLocationHash();
+                });
             }
-
+            regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
             setPropsFromLocationHash(){
                 const hash = window.location.hash;
-                const regExp = new RegExp('(.*)' + this.whereUid + '>(.*)```JSON(.*)```(.*)')
-                const splitHash = hash.split(regExp);
-                if(!splitHash || splitHash.length !==6) return;
-                const selector = splitHash[2];
-                const target = this.querySelector(selector);
-                if(!target) return;
-                const source = JSON.parse(splitHash[3]);
-                Object.assign(target, source);
+                if(hash === this.previousHash) return;
+                this.previousHash = hash;
+                const splitHash = hash.split(this.regExp);
+                if(!splitHash || splitHash.length !==5) return;
+                const source = JSON.parse(splitHash[2]);
+                const targets = this.querySelectorAll('[hash-tag]');
+                if(!targets || targets.length === 0) return;
+                targets.forEach(target => Object.assign(target, source));
             }
         }
+        customElements.define(XtalInHash.is, XtalInHash);
     }
+
+    initXtalInHash();
 }
