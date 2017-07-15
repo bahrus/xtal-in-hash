@@ -5,7 +5,7 @@
 
 Allow location.hash to provide an input channel for web components.  
 
-Click on demo link in lower left screen to see a demo.
+Because of the nature of this component, the best demo link to use is [this](http://rawgit.com/bahrus/xtal/master/bower_components/xtal-in-hash/demo/index.html).
 
 location.hash can serve as a useful way to pass properties to components.  It has these advantages:
 
