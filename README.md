@@ -23,6 +23,15 @@ xtal-in-hash searches it's children for any dom elements with the attribute *has
 <xtal-in-hash>
 ```
 
+In the case of a component being inside a nested iFrame, one can specify to use window.top for the location hash (assuming no cross domain url's in that hierarchy).  One specifies to use window.top as follows:
+
+```html
+<xtal-in-hash set child-props from top-location-hash>
+    <some-component hash-tag></some-component>
+    ...
+    <some-other-component hash-tag></some-other-component>
+<xtal-in-hash>
+```
 
 *xtal-in-hash* searches for, and listens to, the value of wondow.location.hash for a string inside these markers:
 

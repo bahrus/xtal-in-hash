@@ -41,6 +41,10 @@ var xtal;
                             type: Boolean,
                             observer: 'onPropsChange'
                         },
+                        topLocationHash: {
+                            type: Boolean,
+                            observer: 'onPropsChange'
+                        },
                         set: {
                             type: Boolean,
                             observer: 'onPropsChange'
@@ -59,21 +63,24 @@ var xtal;
                     if (!this.previousHash) {
                         this.setPropsFromLocationHash();
                     }
-                    if (this.set && this.childProps && this.from && this.locationHash) {
+                    if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                         const _this = this;
-                        window.addEventListener('hashchange', () => {
+                        const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                        objToAddListernerTo.addEventListener('hashchange', () => {
                             _this.setPropsFromLocationHash();
                         });
                     }
                 }
                 disconnectedCallback() {
                     const _this = this;
-                    window.removeEventListener('hashchange', () => {
+                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                    objToAddListernerTo.removeEventListener('hashchange', () => {
                         _this.setPropsFromLocationHash();
                     });
                 }
                 setPropsFromLocationHash() {
-                    const hash = window.location.hash;
+                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                    const hash = objToAddListernerTo.location.hash;
                     if (hash === this.previousHash)
                         return;
                     this.previousHash = hash;

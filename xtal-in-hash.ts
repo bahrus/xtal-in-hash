@@ -5,6 +5,7 @@ module xtal.elements{
             childProps: boolean | polymer.PropObjectType,
             from: boolean | polymer.PropObjectType,
             locationHash: boolean | polymer.PropObjectType,
+            topLocationHash: boolean | polymer.PropObjectType,
             set: boolean | polymer.PropObjectType,
             showUsage: boolean | polymer.PropObjectType,
             toFrom: boolean | polymer.PropObjectType,
@@ -31,6 +32,7 @@ module xtal.elements{
             set: boolean;
             showUsage: boolean;
             toFrom: boolean;
+            topLocationHash: boolean;
             // whereUid: string;
             static get is(){return tagName;}
             static get properties() : IXtalInHashProperties{
@@ -48,6 +50,10 @@ module xtal.elements{
                         observer: 'onPropsChange'
                     },
                     locationHash:{
+                        type: Boolean,
+                        observer: 'onPropsChange'
+                    },
+                    topLocationHash:{
                         type: Boolean,
                         observer: 'onPropsChange'
                     },
@@ -71,9 +77,10 @@ module xtal.elements{
                 if(!this.previousHash) {
                     this.setPropsFromLocationHash();
                 }
-                if(this.set && this.childProps && this.from && this.locationHash){
+                if(this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash){
                     const _this = this;
-                    window.addEventListener('hashchange', () =>{
+                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                    objToAddListernerTo.addEventListener('hashchange', () =>{
                         _this.setPropsFromLocationHash();
                     });
                 }
@@ -81,13 +88,15 @@ module xtal.elements{
 
             disconnectedCallback(){
                 const _this = this;
-                window.removeEventListener('hashchange',() =>{
+                const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                objToAddListernerTo.removeEventListener('hashchange',() =>{
                     _this.setPropsFromLocationHash();
                 });
             }
             regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
             setPropsFromLocationHash(){
-                const hash = window.location.hash;
+                const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                const hash = objToAddListernerTo.location.hash;
                 if(hash === this.previousHash) return;
                 this.previousHash = hash;
                 const splitHash = hash.split(this.regExp);
