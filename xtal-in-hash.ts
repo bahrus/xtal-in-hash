@@ -32,7 +32,7 @@ module xtal.elements{
             showUsage: boolean;
             toFrom: boolean;
             // whereUid: string;
-            static get is(){return 'xtal-in-hash';}
+            static get is(){return tagName;}
             static get properties() : IXtalInHashProperties{
                 return {
                     bind: {
@@ -101,5 +101,17 @@ module xtal.elements{
         customElements.define(XtalInHash.is, XtalInHash);
     }
 
-    initXtalInHash();
+    const syncFlag = 'xtal_elements_in_hash_sync'
+    if(window[syncFlag]){
+        customElements.whenDefined('poly-prep-sync').then(() => initXtalInHash());
+        delete window[syncFlag];
+    }else{
+        if(customElements.get('poly-prep') || customElements.get('full-poly-prep')){
+            initXtalInHash();
+        }else{
+            customElements.whenDefined('poly-prep').then(() => initXtalInHash());
+            customElements.whenDefined('full-poly-prep').then(() => initXtalInHash());
+        }
+    
+    }
 }
