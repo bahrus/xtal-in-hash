@@ -40,8 +40,6 @@ In the case of a component being inside a nested iFrame, one can specify to use 
 
 This component parses the string inside the markers above using JSON.parse.  It then applies these properties to the child component(s) with attribute hash-tag. 
 
-[To be implemented]:
-
 Our next level of complexity is if we additionally want the binding to work the other way -- if, in the course of the application life cycle, we want those changes to reflect back to location.hash, then we modify the markup to look like this:
 
 ```html

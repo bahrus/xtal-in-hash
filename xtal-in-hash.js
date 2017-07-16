@@ -129,7 +129,8 @@ var xtal;
                                     const splitHash = hash.split(this.regExp);
                                     if (!splitHash || splitHash.length !== 5)
                                         return;
-                                    splitHash[2] = newJsonString;
+                                    splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
+                                    const newHash = splitHash.join('');
                                     objToAddListernerTo.location.hash = splitHash.join('');
                                 });
                             }
