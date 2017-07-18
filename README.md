@@ -13,7 +13,16 @@ location.hash can serve as a useful way to pass properties to components.  It ha
 *  The properties can be modified without touching the code -- a convenient way to test or configure quickly.
 *  Web components can be viewed as a new and greatly improved form of iframes.  However, there are some settings where an iframe is required, or more precisely, a way to expose a web component as a standalone url, that can be integrated into other applications, even non web based application (e.g. an iOS WebView component).  Another scenario where iframes may still be needed is for those web components that aren't compatible with being inside shadow DOM, such as JQuery plugins.
 
-xtal-in-hash searches it's children for any dom elements with the attribute *hash-tag*, and passes in the properties from above.  It will continue to modify these children as the window.location.hash changes.
+*xtal-in-hash* searches for, and listens to, the value of wondow.location.hash for a string inside these markers:
+
+ *  Left hand side marker: xtal-in-hash:json```
+ *  Right hand side marker: ``` 
+
+This component parses the string inside the markers above using JSON.parse.  It then applies these properties to the child component(s) with attribute hash-tag. 
+
+xtal-in-hash searches its children for any dom elements with the attribute *hash-tag*, and passes in the properties from above.  It will continue to modify these children as the window.location.hash changes.
+
+The syntax for this one way binding is shown below.
 
 ```html
 <xtal-in-hash set child-props from location-hash>
@@ -33,13 +42,8 @@ In the case of a component being inside a nested iFrame, one can specify to use 
 <xtal-in-hash>
 ```
 
-*xtal-in-hash* searches for, and listens to, the value of wondow.location.hash for a string inside these markers:
 
- *  Left hand side marker: xtal-in-hash:json```
- *  Right hand side marker: ``` 
-
-This component parses the string inside the markers above using JSON.parse.  It then applies these properties to the child component(s) with attribute hash-tag. 
-
+ 
 Our next level of complexity is if we additionally want the binding to work the other way -- if, in the course of the application life cycle, we want those changes to reflect back to location.hash, then we modify the markup to look like this:
 
 ```html
