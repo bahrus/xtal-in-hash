@@ -18,7 +18,7 @@ interface IXtalInHashProperties {
     /**
     * `xtal-in-hash`
     *  Dependency free web component that reads the location.hash for a JSON object:
-    *  https://mydomain.com/myPath/?queryString=1#myUID1>some-component```json{"prop1": "hello, world"}```
+    *  https://mydomain.com/myPath/?queryString=1#myUID1...xtal-in-hash```json{"prop1": "hello, world"}```
     * 
     *
     * @customElement
@@ -129,13 +129,12 @@ interface IXtalInHashProperties {
             return s.replace(/(\-\w)/g, function (m) { return m[1].toUpperCase(); });
         }
         attributeChangedCallback(name, oldValue, newValue) {
-            this['_' + this.snakeToCamel(name)] = newValue;
+            this['_' + this.snakeToCamel(name)] = newValue !== null;
             this.onPropsChange();
         }
 
         previousHash;
         onPropsChange() {
-
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 const _this = this;
                 const objToAddListernerTo = this.topLocationHash ? window.top : window;
@@ -157,7 +156,11 @@ interface IXtalInHashProperties {
                 }
             }
         }
-
+        connectedCallback(){
+            XtalInHash.observedAttributes.forEach(attrib =>{
+                this._upgradeProperty(this.snakeToCamel(attrib));
+            });
+        }
         disconnectedCallback() {
             const _this = this;
             const objToAddListernerTo = this.topLocationHash ? window.top : window;
