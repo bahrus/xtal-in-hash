@@ -1,7 +1,7 @@
 {
   "name": "xtal-in-hash",
   "flat": true,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Allows location.hash to serve as an input channel for web components",
   "main": "xtal-in-hash.js",
   "repository": "https://github.com/bahrus/xtal-in-hash",
