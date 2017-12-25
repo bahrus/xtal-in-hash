@@ -9,9 +9,12 @@
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../xtal-in-hash.html">
+
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
-
     </style>
   </custom-style>
 </head>
@@ -19,21 +22,15 @@
 <body>
   <div class="vertical-section-container centered">
     <h3>Basic xtal-in-hash demo</h3>
-    <link async rel="import" href="../../poly-prep/full-poly-prep.html">
-    <full-poly-prep>
-      <template>
-        <link async rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-        <link async rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-        <link async rel="import" href="../xtal-in-hash.html">
-      </template>
-    </full-poly-prep>
+    
     <demo-snippet>
       <template>
         <dom-module id="my-component">
           <template>
-            
+
             <div>Message: [[message]]</div>
-            Modify message: <input type="textbox" value="{{message::input}}">
+            Modify message:
+            <input type="textbox" value="{{message::input}}">
           </template>
         </dom-module>
         <script>
@@ -58,15 +55,14 @@
         </xtal-in-hash>
         <div>Two way binding</div>
         <xtal-in-hash bind child-props to-from location-hash>
-          <div>Instructions:  Modify text in text below, watch it reflect in address bar.  Refresh browser, notice
-            the change persists</div>
+          <div>Instructions: Modify text in text below, watch it reflect in address bar. Refresh browser, notice the change persists</div>
           <my-component hash-tag></my-component>
         </xtal-in-hash>
         <script>
-            if(window.location.hash.length <= 1){
-              window.location.hash = 'xtal-in-hash:json```{"message": "hello"}```';
-            }
-            
+          if (window.location.hash.length <= 1) {
+            window.location.hash = 'xtal-in-hash:json```{"message": "hello"}```';
+          }
+
         </script>
       </template>
     </demo-snippet>
