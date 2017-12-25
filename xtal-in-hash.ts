@@ -16,7 +16,7 @@ module xtal.elements {
 
         /**
         * `xtal-in-hash`
-        * Polymer based component that reads the location.hash for a JSON object:
+        *  Dependency free web component that reads the location.hash for a JSON object:
         *  https://mydomain.com/myPath/?queryString=1#myUID1>some-component```json{"prop1": "hello, world"}```
         * 
         *
@@ -24,15 +24,103 @@ module xtal.elements {
         * @polymer
         * @demo demo/index.html
         */
-        class XtalInHash extends Polymer.Element implements IXtalInHashProperties {
-            bind: boolean;
-            childProps: boolean;
-            from: boolean;
-            locationHash: boolean;
-            set: boolean;
-            showUsage: boolean;
-            toFrom: boolean;
-            topLocationHash: boolean;
+        class XtalInHash extends HTMLElement implements IXtalInHashProperties {
+            _bind: boolean;
+            get bind(){
+                return this._bind;
+            }
+            set bind(newVal){
+                this._bind = newVal;
+                if(newVal){
+                    this.setAttribute('bind', '')
+                }else{
+                    this.removeAttribute('bind');
+                } 
+            }
+            _childProps: boolean;
+            get childProps(){
+                return this._childProps;
+            }
+            set childProps(newVal){
+                this._childProps = newVal;
+                if(newVal){
+                    this.setAttribute('child-props', '')
+                }else{
+                    this.removeAttribute('child-props');
+                } 
+            }
+            _from: boolean;
+            get from(){
+                return this._from;
+            }
+            set from(newVal){
+                this._from = newVal;
+                if(newVal){
+                    this.setAttribute('from', '')
+                }else{
+                    this.removeAttribute('from');
+                } 
+            }
+            _locationHash: boolean;
+            get locationHash(){
+                return this._locationHash;
+            }
+            set locationHash(newVal){
+                this._locationHash = newVal;
+                if(newVal){
+                    this.setAttribute('location-hash', '')
+                }else{
+                    this.removeAttribute('location-hash');
+                } 
+            }
+            _set: boolean;
+            get set(){
+                return this._set;
+            }
+            set set(newVal){
+                this._set = newVal;
+                if(newVal){
+                    this.setAttribute('set', '')
+                }else{
+                    this.removeAttribute('set');
+                } 
+            }
+            _showUsage: boolean;
+            get showUsage(){
+                return this._showUsage;
+            }
+            set showUsage(newVal){
+                this._showUsage = newVal;
+                if(newVal){
+                    this.setAttribute('show-usage', '')
+                }else{
+                    this.removeAttribute('show-usage');
+                } 
+            }
+            _toFrom: boolean;
+            get toFrom(){
+                return this._toFrom;
+            }
+            set toFrom(newVal){
+                this._toFrom = newVal;
+                if(newVal){
+                    this.setAttribute('to-from', '')
+                }else{
+                    this.removeAttribute('to-from');
+                } 
+            }
+            _topLocationHash: boolean;
+            get topLocationHash(){
+                return this._topLocationHash;
+            }
+            set topLocationHash(newVal){
+                this._topLocationHash = newVal;
+                if(newVal){
+                    this.setAttribute('top-location-hash', '')
+                }else{
+                    this.removeAttribute('top-location-hash');
+                } 
+            }
             // whereUid: string;
             static get is() { return tagName; }
             static get properties(): IXtalInHashProperties {
