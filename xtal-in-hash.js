@@ -124,33 +124,43 @@
             this['_' + this.snakeToCamel(name)] = newValue !== null;
             this.onPropsChange();
         }
+        //_listenerConfigured;
         onPropsChange() {
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
-                const _this = this;
-                const objToAddListernerTo = this.topLocationHash ? window.top : window;
-                objToAddListernerTo.addEventListener('hashchange', () => {
-                    _this.setPropsFromLocationHash();
-                });
                 if (!this.previousHash) {
-                    this.setPropsFromLocationHash();
+                    const _this = this;
+                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                    objToAddListernerTo.addEventListener('hashchange', () => {
+                        _this.setPropsFromLocationHash();
+                    });
                 }
+                this.setPropsFromLocationHash();
             }
             else if (this.bind && this.childProps && this.toFrom &&
                 (this.locationHash || this.topLocationHash)) {
-                const _this = this;
-                const objToAddListernerTo = this.topLocationHash ? window.top : window;
-                objToAddListernerTo.addEventListener('hashchange', () => {
-                    _this.bindPropsToFromLocationHash();
-                });
                 if (!this.previousHash) {
-                    this.bindPropsToFromLocationHash();
+                    const _this = this;
+                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
+                    objToAddListernerTo.addEventListener('hashchange', () => {
+                        _this.bindPropsToFromLocationHash();
+                    });
                 }
+                this.bindPropsToFromLocationHash();
             }
         }
         connectedCallback() {
             XtalInHash.observedAttributes.forEach(attrib => {
                 this._upgradeProperty(this.snakeToCamel(attrib));
             });
+            this._domObserver = new MutationObserver(mutations => {
+                mutations.forEach(function (mutation) {
+                    this.onPropsChange();
+                });
+            });
+            // configuration of the observer:
+            const mutationConfig = { childList: true, subtree: true };
+            // pass in the target node, as well as the observer options
+            this._domObserver.observe(this, mutationConfig);
         }
         disconnectedCallback() {
             const _this = this;
@@ -168,11 +178,53 @@
             const splitHash = hash.split(this.regExp);
             if (!splitHash || splitHash.length !== 5)
                 return;
-            const source = JSON.parse(splitHash[2]);
+            const stripRegEx = /<\/?[^>]+>/gi;
+            const source = JSON.parse(splitHash[2], (key, value) => {
+                if (typeof value === 'string') {
+                    return value.replace(stripRegEx, '');
+                }
+                else {
+                    return value;
+                }
+            });
             const targets = this.querySelectorAll('[hash-tag]');
             if (!targets || targets.length === 0)
                 return;
-            targets.forEach(target => Object.assign(target, source));
+            //targets.forEach(target => Object.assign(target, source));
+            targets.forEach(target => {
+                for (const key in source) {
+                    switch (key) {
+                        case 'innerHTML':
+                        case 'textContent':
+                        case 'innerText':
+                        case 'nodeValue':
+                            console.warn(key + " not allowed");
+                            break;
+                        default:
+                            const val = source[key];
+                            if (key.endsWith('$') && typeof val === 'string') {
+                                target.setAttribute(key.substr(0, key.length - 1), val);
+                            }
+                            else if (key.endsWith('?') && typeof val === 'boolean') {
+                                const keyStem = key.substr(0, key.length - 1);
+                                if (val) {
+                                    target.setAttribute(keyStem, '');
+                                }
+                                else {
+                                    target.removeAttribute(keyStem);
+                                }
+                            }
+                            else {
+                                if (target[key]) {
+                                    Object.assign(target[key], val);
+                                }
+                                else {
+                                    target[key] = val;
+                                }
+                            }
+                    }
+                }
+            });
             return {
                 locationHashObj: source,
                 targets: targets,
