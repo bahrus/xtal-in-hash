@@ -266,10 +266,11 @@ interface IXtalInHashProperties {
                     for (let i = 0, ii = targets.length; i < ii; i++) {
                         const target = targets[i];
                         target.addEventListener(snakeCase + '-changed', e => {
+                            //debugger;
                             locationHashObj[key] = (<any>e).detail.value;
                             const newJsonString = JSON.stringify(locationHashObj);
                             const objToAddListernerTo = this.topLocationHash ? window.top : window;
-                            const hash = objToAddListernerTo.location.hash;
+                            const hash = decodeURI( objToAddListernerTo.location.hash);
                             const splitHash = hash.split(this.regExp);
                             if (!splitHash || splitHash.length !== 5) return;
                             splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
