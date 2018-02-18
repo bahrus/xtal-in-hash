@@ -168,6 +168,7 @@
             objToAddListernerTo.removeEventListener('hashchange', () => {
                 _this.setPropsFromLocationHash();
             });
+            this._domObserver.disconnect();
         }
         setPropsFromLocationHash() {
             const objToAddListernerTo = this.topLocationHash ? window.top : window;

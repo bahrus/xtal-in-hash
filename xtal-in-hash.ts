@@ -181,6 +181,7 @@ interface IXtalInHashProperties {
             objToAddListernerTo.removeEventListener('hashchange', () => {
                 _this.setPropsFromLocationHash();
             });
+            this._domObserver.disconnect();
         }
         regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
         
