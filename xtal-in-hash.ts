@@ -225,7 +225,7 @@ interface IXtalInHashProperties {
                                 }
                                 
                             }else{
-                                if(target[key]) {
+                                if(typeof target[key] === 'object' && typeof val === 'object') {
                                     Object.assign(target[key], val);
                                 }else{
                                     target[key] = val;
