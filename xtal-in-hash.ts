@@ -162,12 +162,14 @@ interface IXtalInHashProperties {
         }
         _domObserver: MutationObserver;
         connectedCallback(){
+            const _this = this;
             XtalInHash.observedAttributes.forEach(attrib =>{
                 this._upgradeProperty(this.snakeToCamel(attrib));
             });
+            
             this._domObserver = new MutationObserver(mutations => {
                 mutations.forEach(function (mutation) {
-                    this.onPropsChange();
+                    _this.onPropsChange();
                 });
             });
             // configuration of the observer:
@@ -186,11 +188,17 @@ interface IXtalInHashProperties {
         regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
         
         setPropsFromLocationHash() {
+            console.log('in setPropsfromLocation');
             const objToAddListernerTo = this.topLocationHash ? window.top : window;
-            const hash = objToAddListernerTo.location.hash;
+            const hash = decodeURI( objToAddListernerTo.location.hash);
+            console.log({
+                hash: hash,
+                previousHash: this.previousHash
+            })
             if (hash === this.previousHash) return;
-            this.previousHash = hash;
+            
             const splitHash = hash.split(this.regExp);
+            console.log(splitHash);
             if (!splitHash || splitHash.length !== 5) return;
             const stripRegEx = /<\/?[^>]+>/gi;
             const source = JSON.parse(splitHash[2], (key, value) => {
@@ -200,8 +208,13 @@ interface IXtalInHashProperties {
                     return value;
                 }
             });
+            console.log(source);
             const targets = this.querySelectorAll('[hash-tag]');
             if (!targets || targets.length === 0) return;
+            console.log({
+                targets: targets,
+                source: source
+            })
             //targets.forEach(target => Object.assign(target, source));
             targets.forEach(target =>{
                 for(const key in source){
@@ -233,7 +246,8 @@ interface IXtalInHashProperties {
                             }
                     }
                 }
-            })
+            });
+            this.previousHash = hash;
             return {
                 locationHashObj: source,
                 targets: targets,
