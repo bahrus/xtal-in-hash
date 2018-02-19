@@ -126,15 +126,12 @@
             this.onPropsChange();
         }
         onPropsChange() {
-            //const win = this.topLocationHash ? window.top : window;
-            //const targets = this.querySelectorAll('[hash-tag]');
             if (!this._win)
                 return;
             if (!this._targets)
                 return;
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
-                    //const _this = this;
                     this._win.addEventListener('hashchange', e => {
                         this.setPropsFromLocationHash();
                     });
@@ -172,8 +169,6 @@
             this.onPropsChange();
         }
         disconnectedCallback() {
-            //const _this = this;
-            //const win = this.topLocationHash ? window.top : window;
             this._win.removeEventListener('hashchange', this.setPropsFromLocationHash);
             this._domObserver.disconnect();
         }
@@ -200,14 +195,6 @@
             const source = XtalInHash.parseLocationHashIfChanged(this._win, this.previousHash);
             if (!source)
                 return;
-            //console.log(source);
-            //const targets = this.querySelectorAll('[hash-tag]');
-            //if (!this._targets) return;
-            // console.log({
-            //     targets: targets,
-            //     source: source
-            // })
-            //targets.forEach(target => Object.assign(target, source));
             this._targets.forEach(target => {
                 for (const key in source) {
                     switch (key) {
@@ -242,19 +229,15 @@
                     }
                 }
             });
-            //this.previousHash = hash;
             return {
                 locationHashObj: source,
             };
         }
         bindPropsToFromLocationHash() {
-            //const win = this.topLocationHash ? window.top : window;
-            //const targets = this.querySelectorAll('[hash-tag]');
             const oneWayProcessing = this.setPropsFromLocationHash();
             if (!oneWayProcessing)
                 return;
             const locationHashObj = oneWayProcessing.locationHashObj;
-            //const targets = oneWayProcessing.targets;
             for (var key in locationHashObj) {
                 if (!this.propertyEventListeners[key]) {
                     this.propertyEventListeners[key] = true;
@@ -262,7 +245,6 @@
                     for (let i = 0, ii = this._targets.length; i < ii; i++) {
                         const target = this._targets[i];
                         target.addEventListener(snakeCase + '-changed', e => {
-                            //debugger;
                             locationHashObj[key] = e.detail.value;
                             const newJsonString = JSON.stringify(locationHashObj);
                             const hash = decodeURI(this._win.location.hash);
@@ -274,9 +256,6 @@
                             this._win.location.hash = splitHash.join('');
                         });
                     }
-                    // this.addEventListener(snakeCase + '-changed', e =>{
-                    //     debugger;
-                    // })
                 }
             }
         }
