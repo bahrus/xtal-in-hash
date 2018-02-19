@@ -6,7 +6,7 @@ interface IXtalInHashProperties {
     locationHash: boolean | polymer.PropObjectType,
     topLocationHash: boolean | polymer.PropObjectType,
     set: boolean | polymer.PropObjectType,
-    showUsage: boolean | polymer.PropObjectType,
+    //showUsage: boolean | polymer.PropObjectType,
     toFrom: boolean | polymer.PropObjectType,
     //whereUid: string | polymer.PropObjectType,
 }
@@ -81,17 +81,17 @@ interface IXtalInHashProperties {
                 this.removeAttribute('set');
             }
         }
-        _showUsage: boolean;
-        get showUsage() {
-            return this._showUsage;
-        }
-        set showUsage(newVal) {
-            if (newVal) {
-                this.setAttribute('show-usage', '')
-            } else {
-                this.removeAttribute('show-usage');
-            }
-        }
+        // _showUsage: boolean;
+        // get showUsage() {
+        //     return this._showUsage;
+        // }
+        // set showUsage(newVal) {
+        //     if (newVal) {
+        //         this.setAttribute('show-usage', '')
+        //     } else {
+        //         this.removeAttribute('show-usage');
+        //     }
+        // }
         _toFrom: boolean;
         get toFrom() {
             return this._toFrom;
@@ -134,7 +134,6 @@ interface IXtalInHashProperties {
         }
 
         previousHash;
-        //_listenerConfigured;
         onPropsChange() {
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {

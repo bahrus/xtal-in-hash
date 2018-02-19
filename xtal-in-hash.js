@@ -73,17 +73,6 @@
                 this.removeAttribute('set');
             }
         }
-        get showUsage() {
-            return this._showUsage;
-        }
-        set showUsage(newVal) {
-            if (newVal) {
-                this.setAttribute('show-usage', '');
-            }
-            else {
-                this.removeAttribute('show-usage');
-            }
-        }
         get toFrom() {
             return this._toFrom;
         }
@@ -124,7 +113,6 @@
             this['_' + this.snakeToCamel(name)] = newValue !== null;
             this.onPropsChange();
         }
-        //_listenerConfigured;
         onPropsChange() {
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
