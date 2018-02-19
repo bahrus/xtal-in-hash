@@ -86,11 +86,11 @@ This location.hash-based two-way binding, combined with routing, as well as a fe
 However, there are some downsides to consider, developer world, before you all dump redux in favor of this component, developed primarily while waiting for my food order at the Loop Pizza grill:
 
 1)  Without further features about to be discussed, performance would be quite abysmal if used to manage complex, large objects, due to the heavy cost of repeated serialization to JSON.
-2)  Users don't necessarily want every global state change to become part of their navigation history.
+2)  End users don't necessarily want every global state change to become part of their navigation history.
 
 So how does xtal-in-hash innoculate itself against these pitfalls?
 
- 
+
 
 ## Install the Polymer-CLI
 
