@@ -135,16 +135,17 @@ interface IXtalInHashProperties {
 
         previousHash;
         onPropsChange() {
+            const win = this.topLocationHash ? window.top : window;
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
                     const _this = this;
-                    const objToAddListernerTo = this.topLocationHash ? window.top : window;
-                    objToAddListernerTo.addEventListener('hashchange', () => {
-                        _this.setPropsFromLocationHash();
+                    
+                    win.addEventListener('hashchange', () => {
+                        _this.setPropsFromLocationHash(win);
                     });
                     
                 }
-                this.setPropsFromLocationHash();
+                this.setPropsFromLocationHash(win);
             } else if (this.bind && this.childProps && this.toFrom &&
                 (this.locationHash || this.topLocationHash)) {
 
@@ -178,42 +179,42 @@ interface IXtalInHashProperties {
         }
         disconnectedCallback() {
             const _this = this;
-            const objToAddListernerTo = this.topLocationHash ? window.top : window;
-            objToAddListernerTo.removeEventListener('hashchange', () => {
-                _this.setPropsFromLocationHash();
+            const win = this.topLocationHash ? window.top : window;
+            win.removeEventListener('hashchange', () => {
+                _this.setPropsFromLocationHash(win);
             });
             this._domObserver.disconnect();
         }
-        regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
-        
-        setPropsFromLocationHash() {
-            console.log('in setPropsfromLocation');
-            const objToAddListernerTo = this.topLocationHash ? window.top : window;
-            const hash = decodeURI( objToAddListernerTo.location.hash);
-            console.log({
-                hash: hash,
-                previousHash: this.previousHash
-            })
-            if (hash === this.previousHash) return;
-            
-            const splitHash = hash.split(this.regExp);
-            console.log(splitHash);
+        static regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
+        static stripRegEx = /<\/?[^>]+>/gi;
+        static parseLocationHashIfChanged(win: Window, instance?: XtalInHash){
+            const hash = decodeURI( win.location.hash);
+            if (instance &&  hash === instance.previousHash) return;
+            const splitHash = hash.split(XtalInHash.regExp);
             if (!splitHash || splitHash.length !== 5) return;
-            const stripRegEx = /<\/?[^>]+>/gi;
             const source = JSON.parse(splitHash[2], (key, value) => {
                 if(typeof value === 'string'){
-                    return value.replace(stripRegEx, '');
+                    return value.replace(XtalInHash.stripRegEx, '');
                 }else{
                     return value;
                 }
             });
-            console.log(source);
+            if(instance) instance.previousHash = hash;
+            return source;
+        }
+        setPropsFromLocationHash(win: Window) {
+            //console.log('in setPropsfromLocation');
+            //const win = this.topLocationHash ? window.top : window;
+            const source = XtalInHash.parseLocationHashIfChanged(win, this.previousHash);
+            if(!source) return;
+
+            //console.log(source);
             const targets = this.querySelectorAll('[hash-tag]');
             if (!targets || targets.length === 0) return;
-            console.log({
-                targets: targets,
-                source: source
-            })
+            // console.log({
+            //     targets: targets,
+            //     source: source
+            // })
             //targets.forEach(target => Object.assign(target, source));
             targets.forEach(target =>{
                 for(const key in source){
@@ -246,7 +247,7 @@ interface IXtalInHashProperties {
                     }
                 }
             });
-            this.previousHash = hash;
+            //this.previousHash = hash;
             return {
                 locationHashObj: source,
                 targets: targets,
@@ -254,7 +255,8 @@ interface IXtalInHashProperties {
         }
         propertyEventListeners: { [key: string]: boolean } = {};
         bindPropsToFromLocationHash() {
-            const oneWayProcessing = this.setPropsFromLocationHash();
+            const win = this.topLocationHash ? window.top : window;
+            const oneWayProcessing = this.setPropsFromLocationHash(win);
             if (!oneWayProcessing) return;
             const locationHashObj = oneWayProcessing.locationHashObj;
             const targets = oneWayProcessing.targets;
@@ -268,14 +270,14 @@ interface IXtalInHashProperties {
                             //debugger;
                             locationHashObj[key] = (<any>e).detail.value;
                             const newJsonString = JSON.stringify(locationHashObj);
-                            const objToAddListernerTo = this.topLocationHash ? window.top : window;
-                            const hash = decodeURI( objToAddListernerTo.location.hash);
-                            const splitHash = hash.split(this.regExp);
+                            
+                            const hash = decodeURI( win.location.hash);
+                            const splitHash = hash.split(XtalInHash.regExp);
                             if (!splitHash || splitHash.length !== 5) return;
                             splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
 
                             const newHash = splitHash.join('');
-                            objToAddListernerTo.location.hash = splitHash.join('');
+                            win.location.hash = splitHash.join('');
                         });
                     }
                     // this.addEventListener(snakeCase + '-changed', e =>{
