@@ -14,7 +14,8 @@ interface IXtalInHashProperties {
 
     const tagName = 'xtal-in-hash';
     if (customElements.get(tagName)) return;
-
+    const location_hash = 'location-hash';
+    const top_location_hash = 'top-location-hash';
     /**
     * `xtal-in-hash`
     *  Dependency free web component that reads the location.hash for a JSON object:
@@ -27,6 +28,7 @@ interface IXtalInHashProperties {
     */
     class XtalInHash extends HTMLElement implements IXtalInHashProperties {
         _bind: boolean;
+        
         get bind() {
             return this._bind;
         }
@@ -65,9 +67,9 @@ interface IXtalInHashProperties {
         }
         set locationHash(newVal) {
             if (newVal) {
-                this.setAttribute('location-hash', '')
+                this.setAttribute(location_hash, '')
             } else {
-                this.removeAttribute('location-hash');
+                this.removeAttribute(location_hash);
             }
         }
         _set: boolean;
@@ -81,17 +83,7 @@ interface IXtalInHashProperties {
                 this.removeAttribute('set');
             }
         }
-        // _showUsage: boolean;
-        // get showUsage() {
-        //     return this._showUsage;
-        // }
-        // set showUsage(newVal) {
-        //     if (newVal) {
-        //         this.setAttribute('show-usage', '')
-        //     } else {
-        //         this.removeAttribute('show-usage');
-        //     }
-        // }
+        
         _toFrom: boolean;
         get toFrom() {
             return this._toFrom;
@@ -109,13 +101,13 @@ interface IXtalInHashProperties {
         }
         set topLocationHash(newVal) {
             if (newVal) {
-                this.setAttribute('top-location-hash', '')
+                this.setAttribute(top_location_hash, '')
             } else {
-                this.removeAttribute('top-location-hash');
+                this.removeAttribute(top_location_hash);
             }
         }
         static get observedAttributes() {
-            return ['bind', 'child-props', 'from', 'location-hash', 'top-location-hash', 'set', 'show-usage', 'to-from'];
+            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
         }
         static get is() { return tagName; }
         _upgradeProperty(prop) {
@@ -128,24 +120,45 @@ interface IXtalInHashProperties {
         snakeToCamel(s) {
             return s.replace(/(\-\w)/g, function (m) { return m[1].toUpperCase(); });
         }
+        _win: Window;
         attributeChangedCallback(name, oldValue, newValue) {
-            this['_' + this.snakeToCamel(name)] = newValue !== null;
+            const val = newValue !== null;
+            this['_' + this.snakeToCamel(name)] = val;
+            switch(name){
+                case location_hash:
+                    if(val) this._win = window;
+                    break;
+                case top_location_hash:
+                    if(val) this._win = window.top;
+                    break;
+                
+            }
             this.onPropsChange();
         }
 
+        // setProps(e: Event){
+        //     //const win = this.topLocationHash ? window.top : window;
+        //     //const targets = this.querySelectorAll('[hash-tag]');
+
+        //     this.setPropsFromLocationHash(this._win, this._targets);            
+        // }
+
         previousHash;
         onPropsChange() {
-            const win = this.topLocationHash ? window.top : window;
+            //const win = this.topLocationHash ? window.top : window;
+            //const targets = this.querySelectorAll('[hash-tag]');
+            if(!this._win) return;
+            if(!this._targets) return;
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
-                    const _this = this;
+                    //const _this = this;
                     
-                    win.addEventListener('hashchange', () => {
-                        _this.setPropsFromLocationHash(win);
+                    this._win.addEventListener('hashchange', e =>{
+                        this.setPropsFromLocationHash();
                     });
                     
                 }
-                this.setPropsFromLocationHash(win);
+                this.setPropsFromLocationHash();
             } else if (this.bind && this.childProps && this.toFrom &&
                 (this.locationHash || this.topLocationHash)) {
 
@@ -160,29 +173,31 @@ interface IXtalInHashProperties {
                 this.bindPropsToFromLocationHash();
             }
         }
+        _targets: NodeListOf<Element>;
+        handleNewDOMNodes(mutations: MutationRecord[]){
+            this._targets = this.querySelectorAll('[hash-tag]');
+            mutations.forEach(function (mutation) {
+                this.onPropsChange(); //TODO:  just apply object to new elements
+            });
+        }
         _domObserver: MutationObserver;
         connectedCallback(){
-            const _this = this;
+            this._targets = this.querySelectorAll('[hash-tag]');
             XtalInHash.observedAttributes.forEach(attrib =>{
                 this._upgradeProperty(this.snakeToCamel(attrib));
             });
             
-            this._domObserver = new MutationObserver(mutations => {
-                mutations.forEach(function (mutation) {
-                    _this.onPropsChange();
-                });
-            });
+            this._domObserver = new MutationObserver(this.handleNewDOMNodes)
             // configuration of the observer:
             const mutationConfig = { childList: true, subtree: true } as MutationObserverInit;
             // pass in the target node, as well as the observer options
             this._domObserver.observe(this, mutationConfig);
+            this.onPropsChange();
         }
         disconnectedCallback() {
-            const _this = this;
-            const win = this.topLocationHash ? window.top : window;
-            win.removeEventListener('hashchange', () => {
-                _this.setPropsFromLocationHash(win);
-            });
+            //const _this = this;
+            //const win = this.topLocationHash ? window.top : window;
+            this._win.removeEventListener('hashchange', this.setPropsFromLocationHash);
             this._domObserver.disconnect();
         }
         static regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
@@ -202,21 +217,20 @@ interface IXtalInHashProperties {
             if(instance) instance.previousHash = hash;
             return source;
         }
-        setPropsFromLocationHash(win: Window) {
-            //console.log('in setPropsfromLocation');
-            //const win = this.topLocationHash ? window.top : window;
-            const source = XtalInHash.parseLocationHashIfChanged(win, this.previousHash);
+        setPropsFromLocationHash() {
+            
+            const source = XtalInHash.parseLocationHashIfChanged(this._win, this.previousHash);
             if(!source) return;
 
             //console.log(source);
-            const targets = this.querySelectorAll('[hash-tag]');
-            if (!targets || targets.length === 0) return;
+            //const targets = this.querySelectorAll('[hash-tag]');
+            //if (!this._targets) return;
             // console.log({
             //     targets: targets,
             //     source: source
             // })
             //targets.forEach(target => Object.assign(target, source));
-            targets.forEach(target =>{
+            this._targets.forEach(target =>{
                 for(const key in source){
                     switch(key){
                         case 'innerHTML':
@@ -250,34 +264,35 @@ interface IXtalInHashProperties {
             //this.previousHash = hash;
             return {
                 locationHashObj: source,
-                targets: targets,
+                //targets: targets,
             };
         }
         propertyEventListeners: { [key: string]: boolean } = {};
         bindPropsToFromLocationHash() {
-            const win = this.topLocationHash ? window.top : window;
-            const oneWayProcessing = this.setPropsFromLocationHash(win);
+            //const win = this.topLocationHash ? window.top : window;
+            //const targets = this.querySelectorAll('[hash-tag]');
+            const oneWayProcessing = this.setPropsFromLocationHash();
             if (!oneWayProcessing) return;
             const locationHashObj = oneWayProcessing.locationHashObj;
-            const targets = oneWayProcessing.targets;
+            //const targets = oneWayProcessing.targets;
             for (var key in locationHashObj) {
                 if (!this.propertyEventListeners[key]) {
                     this.propertyEventListeners[key] = true;
                     const snakeCase = Polymer.CaseMap.camelToDashCase(key);
-                    for (let i = 0, ii = targets.length; i < ii; i++) {
-                        const target = targets[i];
+                    for (let i = 0, ii = this._targets.length; i < ii; i++) {
+                        const target = this._targets[i];
                         target.addEventListener(snakeCase + '-changed', e => {
                             //debugger;
                             locationHashObj[key] = (<any>e).detail.value;
                             const newJsonString = JSON.stringify(locationHashObj);
                             
-                            const hash = decodeURI( win.location.hash);
+                            const hash = decodeURI( this._win.location.hash);
                             const splitHash = hash.split(XtalInHash.regExp);
                             if (!splitHash || splitHash.length !== 5) return;
                             splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
 
                             const newHash = splitHash.join('');
-                            win.location.hash = splitHash.join('');
+                            this._win.location.hash = splitHash.join('');
                         });
                     }
                     // this.addEventListener(snakeCase + '-changed', e =>{
