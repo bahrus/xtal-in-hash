@@ -144,11 +144,11 @@ interface IXtalInHashProperties {
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
                     this._win.addEventListener('hashchange', e =>{
-                        this.setPropsFromLocationHash();
+                        XtalInHash.setPropsFromLocationHash(this);
                     });
                     
                 }
-                this.setPropsFromLocationHash();
+                XtalInHash.setPropsFromLocationHash(this);
             } else if (this.bind && this.childProps && this.toFrom &&
                 (this.locationHash || this.topLocationHash)) {
 
@@ -185,7 +185,7 @@ interface IXtalInHashProperties {
             this.onPropsChange();
         }
         disconnectedCallback() {
-            this._win.removeEventListener('hashchange', this.setPropsFromLocationHash);
+            //this._win.removeEventListener('hashchange', this.setPropsFromLocationHash); //TODO
             this._domObserver.disconnect();
         }
         static regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
@@ -205,13 +205,13 @@ interface IXtalInHashProperties {
             if(instance) instance.previousHash = hash;
             return source;
         }
-        
-        setPropsFromLocationHash() {
+
+        static setPropsFromLocationHash(instance: XtalInHash) {
             
-            const source = XtalInHash.parseLocationHashIfChanged(this._win, this.previousHash);
+            const source = XtalInHash.parseLocationHashIfChanged(instance._win, instance.previousHash);
             if(!source) return;
 
-            this._targets.forEach(target =>{
+            instance._targets.forEach(target =>{
                 for(const key in source){
                     switch(key){
                         case 'innerHTML':
@@ -248,7 +248,7 @@ interface IXtalInHashProperties {
         }
         propertyEventListeners: { [key: string]: boolean } = {};
         bindPropsToFromLocationHash() {
-            const oneWayProcessing = this.setPropsFromLocationHash();
+            const oneWayProcessing = XtalInHash.setPropsFromLocationHash(this);
             if (!oneWayProcessing) return;
             const locationHashObj = oneWayProcessing.locationHashObj;
             for (var key in locationHashObj) {

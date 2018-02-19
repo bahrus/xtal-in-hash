@@ -133,10 +133,10 @@
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
                 if (!this.previousHash) {
                     this._win.addEventListener('hashchange', e => {
-                        this.setPropsFromLocationHash();
+                        XtalInHash.setPropsFromLocationHash(this);
                     });
                 }
-                this.setPropsFromLocationHash();
+                XtalInHash.setPropsFromLocationHash(this);
             }
             else if (this.bind && this.childProps && this.toFrom &&
                 (this.locationHash || this.topLocationHash)) {
@@ -169,7 +169,7 @@
             this.onPropsChange();
         }
         disconnectedCallback() {
-            this._win.removeEventListener('hashchange', this.setPropsFromLocationHash);
+            //this._win.removeEventListener('hashchange', this.setPropsFromLocationHash); //TODO
             this._domObserver.disconnect();
         }
         static parseLocationHashIfChanged(win, instance) {
@@ -191,11 +191,11 @@
                 instance.previousHash = hash;
             return source;
         }
-        setPropsFromLocationHash() {
-            const source = XtalInHash.parseLocationHashIfChanged(this._win, this.previousHash);
+        static setPropsFromLocationHash(instance) {
+            const source = XtalInHash.parseLocationHashIfChanged(instance._win, instance.previousHash);
             if (!source)
                 return;
-            this._targets.forEach(target => {
+            instance._targets.forEach(target => {
                 for (const key in source) {
                     switch (key) {
                         case 'innerHTML':
@@ -234,7 +234,7 @@
             };
         }
         bindPropsToFromLocationHash() {
-            const oneWayProcessing = this.setPropsFromLocationHash();
+            const oneWayProcessing = XtalInHash.setPropsFromLocationHash(this);
             if (!oneWayProcessing)
                 return;
             const locationHashObj = oneWayProcessing.locationHashObj;

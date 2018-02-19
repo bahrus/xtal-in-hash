@@ -87,21 +87,26 @@ This location.hash-based two-way binding, combined with routing, as well as a fe
 
 However, there are some downsides to consider, developer world, before you all dump redux in favor of this component -- developed primarily while waiting for my food order at the Loop Pizza grill (and other fine food establishments):
 
-1)  Without further features about to be discussed, performance would be quite abysmal if used to manage complex, large objects, due to the heavy cost of repeated serialization between the hash-clob and the JSON string.
+1)  Without further features about to be discussed, performance would be quite abysmal if used to manage complex, large objects, due to the heavy cost of repeated serialization between the hash-clob and the JSON string. And Microsoft's ability to thrwart productive development never ceases to amaze.  Microsoft's browsers, including Edge, [impose a ~2000 character limit on url's](http://jsfiddle.net/Jz3ZA/18/), including location.hash!
 2)  End users don't necessarily want every global state change to become part of their navigation history.
 
 So how does xtal-in-hash innoculate itself against these pitfalls?
 
 ## Refs [TODO]
 
-If a key in the hash-clob has name "ref:" and value "myLargeRef.5", then xtal-in-hash assumes there is a a global array with name "myLargeRef" (window.myLargeRef or window.top.myLargeRef) with length 5.  xtal-in-hash will pluck that fifth item of the array and apply that value to the myLargeRef property of all the custom elements with attribute hash-tag.
+If a key in the hash-clob has name "ref:" and value, for example: "myLargeRef.5", then xtal-in-hash assumes there is a a global array with name "myLargeRef" (window.myLargeRef or window.top.myLargeRef) with length 5.  xtal-in-hash will pluck that fifth item of the array and apply that value to the myLargeRef property of all the custom elements with attribute hash-tag. 
 
-xtal-in-hash also has a property:  newRef.  When setting this property, it must be an object with two sub-properties:  name and value.
+If the array is smaller than 5, it will take the last element it finds, and update the hash-clob so they are in sync.
 
-If the name sub-property of newRef is "myLargeRef" in the example above, then xtal-in-hash will append the value subproperty to the global array.
+xtal-in-hash also has a property:  newRef, only applicable if two way binding is enabled.  When setting this property, it must be an object with two sub-properties:  name and value.
 
-xtal-in-has has aanother property to update a ref without getting added to the history:  replaceRef.  This also takes the name and value pair of subproperties. But it replaces the last element of the array, rather than appending.
+If the name sub-property of newRef is "myLargeRef" in the example above, then xtal-in-hash will append the value subproperty to the global array, and update the hash string.
 
+xtal-in-has has aanother property to update a ref without getting added to the history:  replaceRef.  This also takes the name and value pair of subproperties. But it replaces the last element of the array, rather than appending.  xtal-in-hash emits an event with name [myLargeRef]-changed that can allow other parts of the page to respond.
+
+Of course, if you refresh the page, or send the hash link, your local references will not automatically save.  Other mechanisms, for example Polymer's [app storage](https://www.webcomponents.org/element/PolymerElements/app-storage) need to be used for this purpose.
+
+ 
 
 
 ## Debouncing [TODO]
