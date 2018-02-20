@@ -19,6 +19,7 @@
             super(...arguments);
             this.propertyEventListeners = {};
         }
+        //#region properties
         get bind() {
             return this._bind;
         }
@@ -96,6 +97,7 @@
                 this.removeAttribute(top_location_hash);
             }
         }
+        //#endregion
         static get observedAttributes() {
             return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
         }
@@ -131,11 +133,12 @@
             if (!this._targets)
                 return;
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
-                if (!this.previousHash) {
-                    this._win.addEventListener('hashchange', e => {
-                        XtalInHash.setPropsFromLocationHash(this);
-                    });
-                }
+                // if (!this.previousHash) {
+                //     this._win.addEventListener('hashchange', e => {
+                //         XtalInHash.setPropsFromLocationHash(this);
+                //     });
+                // }
+                XtalInHash.createHashSubscriber(this);
                 XtalInHash.setPropsFromLocationHash(this);
             }
             else if (this.bind && this.childProps && this.toFrom &&
@@ -190,6 +193,29 @@
             if (instance)
                 instance.previousHash = hash;
             return source;
+        }
+        static getSubscribers(win) {
+            return this._subscribers.filter(subscriber => subscriber.win === win);
+        }
+        static createHashSubscriber(instance) {
+            if (!this._subscribers)
+                this._subscribers = [];
+            const winSubscribers = this.getSubscribers(instance._win);
+            if (winSubscribers.length === 0) {
+                this._subscribers.push({
+                    win: instance._win,
+                    listeners: [instance]
+                });
+                instance._win.addEventListener('hashchange', e => {
+                    //XtalInHash.setPropsFromLocationHash(this);
+                    this.getSubscribers(instance._win)[0].listeners.forEach(listener => {
+                        this.setPropsFromLocationHash(listener);
+                    });
+                });
+            }
+            else {
+                winSubscribers[0].listeners.push(instance);
+            }
         }
         static setPropsFromLocationHash(instance) {
             const source = XtalInHash.parseLocationHashIfChanged(instance._win, instance.previousHash);
