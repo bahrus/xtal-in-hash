@@ -19,6 +19,7 @@ interface IXtalInHashProperties {
     if (customElements.get(tagName)) return;
     const location_hash = 'location-hash';
     const top_location_hash = 'top-location-hash';
+    const refKey = 'ref:';
     /**
     * `xtal-in-hash`
     *  Dependency free web component that reads the location.hash for a JSON object:
@@ -146,12 +147,7 @@ interface IXtalInHashProperties {
             if (!this._win) return;
             if (!this._targets) return;
             if (this.set && this.childProps && this.from && (this.locationHash || this.topLocationHash)) {
-                // if (!this.previousHash) {
-                //     this._win.addEventListener('hashchange', e => {
-                //         XtalInHash.setPropsFromLocationHash(this);
-                //     });
-
-                // }
+                
                 XtalInHash.createHashSubscriber(this);
                 XtalInHash.setPropsFromLocationHash(this);
             } else if (this.bind && this.childProps && this.toFrom &&
@@ -193,7 +189,7 @@ interface IXtalInHashProperties {
             //this._win.removeEventListener('hashchange', this.setPropsFromLocationHash); //TODO
             this._domObserver.disconnect();
         }
-        static regExp = /(.*)xtal-in-hash:json```(.*)```(.*)/;
+        static regExp = /(.*)json```(.*)```(.*)/;
         static stripRegEx = /<\/?[^>]+>/gi;
         static parseLocationHashIfChanged(win: Window, instance?: XtalInHash) {
             const hash = decodeURI(win.location.hash);
@@ -202,7 +198,25 @@ interface IXtalInHashProperties {
             if (!splitHash || splitHash.length !== 5) return;
             const source = JSON.parse(splitHash[2], (key, value) => {
                 if (typeof value === 'string') {
-                    return value.replace(XtalInHash.stripRegEx, '');
+                    if(key.endsWith(refKey)){
+                        const refs = value.split('.');
+                        let returnObj = self;
+                        for(let i = 0, ii = refs.length; i < ii; i++){
+                            const ref = refs[i];
+                            const previousRef = returnObj;
+                            returnObj = returnObj[ref];
+                            if(!returnObj){
+                                if(Array.isArray(previousRef) && previousRef.length > 0){
+                                    returnObj = previousRef[previousRef.length - 1];
+                                }else{
+                                    return null;
+                                }
+                            } 
+                        }
+                        return returnObj;
+                    }else{
+                        return value.replace(XtalInHash.stripRegEx, '');
+                    }
                 } else {
                     return value;
                 }
@@ -260,8 +274,12 @@ interface IXtalInHashProperties {
                                 }
 
                             } else {
-                                if (typeof target[key] === 'object' && typeof val === 'object') {
-                                    Object.assign(target[key], val);
+                                let key$ = key;
+                                if(key.endsWith(refKey)){
+                                    key$ = key.substr(0, key.length - refKey.length - 1);
+                                }
+                                if (typeof target[key$] === 'object' && typeof val === 'object') {
+                                    Object.assign(target[key$], val);
                                 } else {
                                     target[key] = val;
                                 }
