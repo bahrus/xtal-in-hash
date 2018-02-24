@@ -91,16 +91,21 @@ Not all notify properties will be bound to the location.hash -- only those prope
 
 Microsoft's browsers (IE and Edge) restrict the total length of the url, including the hash portion, to around 2k characters.  So how can we pass large objects or arrays?
 
-If a key in the hash-clob ends with the name ".ref:", including the ending colon, and value, for example: "myLargeRef.5", then xtal-in-hash assumes there is a a global array with name "myLargeRef" (window.myLargeRef or window.top.myLargeRef) with length 5.  xtal-in-hash will pluck that fifth item of the array and apply that value to the myLargeRef property when merging the properties into all the custom elements with attribute hash-tag. 
+## Implemented but not yet tested
+
+## Refs
+
+If a key in the hash-clob ends with the name ".ref:", including the ending colon, and value, for example: "myLargeRef[5],", then xtal-in-hash assumes there is a a global array with name "myLargeRef" (window.myLargeRef or window.top.myLargeRef) with length 5.  xtal-in-hash will pluck that fifth item of the array and apply that value to the myLargeRef property when merging the properties into all the custom elements with attribute hash-tag. 
 
 If the array is smaller than 5, it will take the last element it finds, and update the hash-clob so they are in sync.
 
+If no such reference is found, it will be ignored.  This can be a problem if we are not guaranteed the order between when the necessary global refs will be available, vs the the time when the xtal-in-hash applies all the properties to its targets.  The most straightforward solution would be to not set one of the key attributes / properties until all the references have been loaded onto the page.  I.e.
 
-
-## Refs [TODO]
-
-If no such reference is found, it will be ignored.  This can be a problem if we are not guaranteed the order between when the global refs will be available, vs the the time when the xtal-in-hash applies all the properties to its a targets.  But an attribute "refs-still-loading" allows one to wait until the global refs are all defined, then by removing the attribute from xtal-in-hash,it will reevaluate the hash-clob. 
-
+```JavaScript
+loadGlobalReferences.then(() =>{
+    document.querySelectorAll('xtal-in-hash').forEach(el => el.childProps = true);
+})
+```
 xtal-in-hash also has a property:  newRef, only applicable if two way binding is enabled.  When setting this property, it must be an object with two sub-properties:  name and value.
 
 If the name sub-property of newRef is "myLargeRef" in the example above, and it is of type array, then xtal-in-hash will append the value subproperty to the global array, and update the hash string to point to the last element of the array..

@@ -1,16 +1,22 @@
 
 interface IXtalInHashProperties {
-    bind: boolean ,
+    bind: boolean,
     childProps: boolean,
-    from: boolean ,
-    locationHash: boolean ,
+    from: boolean,
+    locationHash: boolean,
     topLocationHash: boolean,
-    set: boolean ,
+    set: boolean,
     //showUsage: boolean | polymer.PropObjectType,
     toFrom: boolean ,
-    refsStillLoading : boolean,
+    newRef: INameValuePair,
     //whereUid: string | polymer.PropObjectType,
 }
+
+interface INameValuePair{
+    name: string,
+    value: object,
+}
+
 (function () {
     interface IWindowSubscribers {
         win: Window,
@@ -20,7 +26,6 @@ interface IXtalInHashProperties {
     if (customElements.get(tagName)) return;
     const location_hash = 'location-hash';
     const top_location_hash = 'top-location-hash';
-    const refs_still_loading = 'refs-still-loading';
     const refKey = 'ref:';
     /**
     * `xtal-in-hash`
@@ -113,20 +118,36 @@ interface IXtalInHashProperties {
             }
         }
 
-        _refsStillLoading: boolean;
-        get refsStillLoading(){
-            return this._refsStillLoading;
+        _newRef: INameValuePair;
+        get newRef(){
+            return this._newRef;
         }
-        set refsStillLoading(newVal){
-            if(newVal){
-                this.setAttribute(refs_still_loading, '');
-            }else{
-                this.removeAttribute(refs_still_loading);
+        set newRef(newVal){
+            this._newRef = newVal;
+            const array = XtalInHash.getGlobalRef(newVal.name, true) as any[];
+            if(array && Array.isArray(array)) {
+                const path = newVal.name + '[' + array.length + ']';
+                array.push(newVal.value);
+                const newPath = newVal.name + '[' + array.length + ']';
+                this._win.location.hash = decodeURI(this._win.location.hash).replace(path, newPath);
             }
         }
+
+        _replaceRef: INameValuePair;
+        get replaceRef(){
+            return this._replaceRef;
+        }
+        set replaceRef(newVal){
+            this._replaceRef = newVal;
+            const array = XtalInHash.getGlobalRef(newVal.name, true) as any[];
+            if(array && Array.isArray(array)){
+                array[array.length - 1] = newVal;
+            }
+        }
+        
         //#endregion
         static get observedAttributes() {
-            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from', refs_still_loading];
+            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
         }
         static get is() { return tagName; }
         _upgradeProperty(prop) {
@@ -191,7 +212,8 @@ interface IXtalInHashProperties {
             XtalInHash.observedAttributes.forEach(attrib => {
                 this._upgradeProperty(this.snakeToCamel(attrib));
             });
-
+            this._upgradeProperty('newRef');
+            this._upgradeProperty('updateRef');
             this._domObserver = new MutationObserver(this.handleNewDOMNodes)
             // configuration of the observer:
             const mutationConfig = { childList: true, subtree: true } as MutationObserverInit;
@@ -205,6 +227,40 @@ interface IXtalInHashProperties {
         }
         static regExp = /(.*)json```(.*)```(.*)/;
         static stripRegEx = /<\/?[^>]+>/gi;
+        static getGlobalRef(path: string, stopAtArray?: boolean){
+            let index : number = null;
+            if(path.endsWith(']')){
+                const iPosOfLast = path.lastIndexOf('[');
+                index = parseInt( path.substring(iPosOfLast + 1, path.length - 2));
+                path = path.substr(0, iPosOfLast);
+            }
+            const refs = path.split('.');
+            let returnObj = self;
+            for(let i = 0, ii = refs.length; i < ii; i++){
+                const ref = refs[i];
+//                const previousRef = returnObj;
+  //              const isArray = Array.isArray(previousRef);
+      //          if(isArray && stopAtArray) return previousRef;
+    //            if(isArray){
+                    
+        //        }else{
+                    returnObj = returnObj[ref];
+                    if(!returnObj) return null;
+          //      }
+                
+                // if(!returnObj){
+                //     if(isArray && previousRef.length > 0){
+                //         returnObj = previousRef[previousRef.length - 1];
+                //     }else{
+                //         return null;
+                //     }
+                // }
+
+            }
+            if(index === null ||  stopAtArray || !Array.isArray(returnObj)) return returnObj as any;
+            if(returnObj.length <= index) return returnObj[returnObj.length - 1];
+            return returnObj[index];
+        }
         static parseLocationHashIfChanged(win: Window, instance?: XtalInHash) {
             const hash = decodeURI(win.location.hash);
             if (instance && hash === instance.previousHash) return;
@@ -213,21 +269,8 @@ interface IXtalInHashProperties {
             const source = JSON.parse(splitHash[2], (key, value) => {
                 if (typeof value === 'string') {
                     if(key.endsWith(refKey)){
-                        const refs = value.split('.');
-                        let returnObj = self;
-                        for(let i = 0, ii = refs.length; i < ii; i++){
-                            const ref = refs[i];
-                            const previousRef = returnObj;
-                            returnObj = returnObj[ref];
-                            if(!returnObj){
-                                if(Array.isArray(previousRef) && previousRef.length > 0){
-                                    returnObj = previousRef[previousRef.length - 1];
-                                }else{
-                                    return null;
-                                }
-                            } 
-                        }
-                        return returnObj;
+
+                        return this.getGlobalRef(value);
                     }else{
                         return value.replace(XtalInHash.stripRegEx, '');
                     }

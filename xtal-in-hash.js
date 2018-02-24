@@ -4,7 +4,6 @@
         return;
     const location_hash = 'location-hash';
     const top_location_hash = 'top-location-hash';
-    const refs_still_loading = 'refs-still-loading';
     const refKey = 'ref:';
     /**
     * `xtal-in-hash`
@@ -99,20 +98,32 @@
                 this.removeAttribute(top_location_hash);
             }
         }
-        get refsStillLoading() {
-            return this._refsStillLoading;
+        get newRef() {
+            return this._newRef;
         }
-        set refsStillLoading(newVal) {
-            if (newVal) {
-                this.setAttribute(refs_still_loading, '');
+        set newRef(newVal) {
+            this._newRef = newVal;
+            const array = XtalInHash.getGlobalRef(newVal.name, true);
+            if (array && Array.isArray(array)) {
+                const path = newVal.name + '[' + array.length + ']';
+                array.push(newVal.value);
+                const newPath = newVal.name + '[' + array.length + ']';
+                this._win.location.hash = decodeURI(this._win.location.hash).replace(path, newPath);
             }
-            else {
-                this.removeAttribute(refs_still_loading);
+        }
+        get replaceRef() {
+            return this._replaceRef;
+        }
+        set replaceRef(newVal) {
+            this._replaceRef = newVal;
+            const array = XtalInHash.getGlobalRef(newVal.name, true);
+            if (array && Array.isArray(array)) {
+                array[array.length - 1] = newVal;
             }
         }
         //#endregion
         static get observedAttributes() {
-            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from', refs_still_loading];
+            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
         }
         static get is() { return tagName; }
         _upgradeProperty(prop) {
@@ -172,6 +183,8 @@
             XtalInHash.observedAttributes.forEach(attrib => {
                 this._upgradeProperty(this.snakeToCamel(attrib));
             });
+            this._upgradeProperty('newRef');
+            this._upgradeProperty('updateRef');
             this._domObserver = new MutationObserver(this.handleNewDOMNodes);
             // configuration of the observer:
             const mutationConfig = { childList: true, subtree: true };
@@ -183,6 +196,40 @@
             //this._win.removeEventListener('hashchange', this.setPropsFromLocationHash); //TODO
             this._domObserver.disconnect();
         }
+        static getGlobalRef(path, stopAtArray) {
+            let index = null;
+            if (path.endsWith(']')) {
+                const iPosOfLast = path.lastIndexOf('[');
+                index = parseInt(path.substring(iPosOfLast + 1, path.length - 2));
+                path = path.substr(0, iPosOfLast);
+            }
+            const refs = path.split('.');
+            let returnObj = self;
+            for (let i = 0, ii = refs.length; i < ii; i++) {
+                const ref = refs[i];
+                //                const previousRef = returnObj;
+                //              const isArray = Array.isArray(previousRef);
+                //          if(isArray && stopAtArray) return previousRef;
+                //            if(isArray){
+                //        }else{
+                returnObj = returnObj[ref];
+                if (!returnObj)
+                    return null;
+                //      }
+                // if(!returnObj){
+                //     if(isArray && previousRef.length > 0){
+                //         returnObj = previousRef[previousRef.length - 1];
+                //     }else{
+                //         return null;
+                //     }
+                // }
+            }
+            if (index === null || stopAtArray || !Array.isArray(returnObj))
+                return returnObj;
+            if (returnObj.length <= index)
+                return returnObj[returnObj.length - 1];
+            return returnObj[index];
+        }
         static parseLocationHashIfChanged(win, instance) {
             const hash = decodeURI(win.location.hash);
             if (instance && hash === instance.previousHash)
@@ -193,22 +240,7 @@
             const source = JSON.parse(splitHash[2], (key, value) => {
                 if (typeof value === 'string') {
                     if (key.endsWith(refKey)) {
-                        const refs = value.split('.');
-                        let returnObj = self;
-                        for (let i = 0, ii = refs.length; i < ii; i++) {
-                            const ref = refs[i];
-                            const previousRef = returnObj;
-                            returnObj = returnObj[ref];
-                            if (!returnObj) {
-                                if (Array.isArray(previousRef) && previousRef.length > 0) {
-                                    returnObj = previousRef[previousRef.length - 1];
-                                }
-                                else {
-                                    return null;
-                                }
-                            }
-                        }
-                        return returnObj;
+                        return this.getGlobalRef(value);
                     }
                     else {
                         return value.replace(XtalInHash.stripRegEx, '');
