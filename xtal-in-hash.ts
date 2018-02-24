@@ -1,13 +1,14 @@
 
 interface IXtalInHashProperties {
-    bind: boolean | polymer.PropObjectType,
-    childProps: boolean | polymer.PropObjectType,
-    from: boolean | polymer.PropObjectType,
-    locationHash: boolean | polymer.PropObjectType,
-    topLocationHash: boolean | polymer.PropObjectType,
-    set: boolean | polymer.PropObjectType,
+    bind: boolean ,
+    childProps: boolean,
+    from: boolean ,
+    locationHash: boolean ,
+    topLocationHash: boolean,
+    set: boolean ,
     //showUsage: boolean | polymer.PropObjectType,
-    toFrom: boolean | polymer.PropObjectType,
+    toFrom: boolean ,
+    refsStillLoading : boolean,
     //whereUid: string | polymer.PropObjectType,
 }
 (function () {
@@ -19,6 +20,7 @@ interface IXtalInHashProperties {
     if (customElements.get(tagName)) return;
     const location_hash = 'location-hash';
     const top_location_hash = 'top-location-hash';
+    const refs_still_loading = 'refs-still-loading';
     const refKey = 'ref:';
     /**
     * `xtal-in-hash`
@@ -110,9 +112,21 @@ interface IXtalInHashProperties {
                 this.removeAttribute(top_location_hash);
             }
         }
+
+        _refsStillLoading: boolean;
+        get refsStillLoading(){
+            return this._refsStillLoading;
+        }
+        set refsStillLoading(newVal){
+            if(newVal){
+                this.setAttribute(refs_still_loading, '');
+            }else{
+                this.removeAttribute(refs_still_loading);
+            }
+        }
         //#endregion
         static get observedAttributes() {
-            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
+            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from', refs_still_loading];
         }
         static get is() { return tagName; }
         _upgradeProperty(prop) {
@@ -309,7 +323,7 @@ interface IXtalInHashProperties {
                             const hash = decodeURI(this._win.location.hash);
                             const splitHash = hash.split(XtalInHash.regExp);
                             if (!splitHash || splitHash.length !== 5) return;
-                            splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
+                            splitHash[2] = 'json```' + newJsonString + '```';
 
                             const newHash = splitHash.join('');
                             this._win.location.hash = splitHash.join('');

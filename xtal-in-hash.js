@@ -4,6 +4,7 @@
         return;
     const location_hash = 'location-hash';
     const top_location_hash = 'top-location-hash';
+    const refs_still_loading = 'refs-still-loading';
     const refKey = 'ref:';
     /**
     * `xtal-in-hash`
@@ -98,9 +99,20 @@
                 this.removeAttribute(top_location_hash);
             }
         }
+        get refsStillLoading() {
+            return this._refsStillLoading;
+        }
+        set refsStillLoading(newVal) {
+            if (newVal) {
+                this.setAttribute(refs_still_loading, '');
+            }
+            else {
+                this.removeAttribute(refs_still_loading);
+            }
+        }
         //#endregion
         static get observedAttributes() {
-            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from'];
+            return ['bind', 'child-props', 'from', location_hash, top_location_hash, 'set', 'show-usage', 'to-from', refs_still_loading];
         }
         static get is() { return tagName; }
         _upgradeProperty(prop) {
@@ -297,7 +309,7 @@
                             const splitHash = hash.split(XtalInHash.regExp);
                             if (!splitHash || splitHash.length !== 5)
                                 return;
-                            splitHash[2] = 'xtal-in-hash:json```' + newJsonString + '```';
+                            splitHash[2] = 'json```' + newJsonString + '```';
                             const newHash = splitHash.join('');
                             this._win.location.hash = splitHash.join('');
                         });
