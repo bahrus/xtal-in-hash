@@ -126,9 +126,9 @@ interface INameValuePair{
             this._newRef = newVal;
             const array = XtalInHash.getGlobalRef(newVal.name, true) as any[];
             if(array && Array.isArray(array)) {
-                const path = newVal.name + '[' + array.length + ']';
+                const path = newVal.name + '[' + (array.length - 1) + ']';
                 array.push(newVal.value);
-                const newPath = newVal.name + '[' + array.length + ']';
+                const newPath = newVal.name + '[' + (array.length - 1) + ']';
                 this._win.location.hash = decodeURI(this._win.location.hash).replace(path, newPath);
             }
         }
@@ -231,7 +231,7 @@ interface INameValuePair{
             let index : number = null;
             if(path.endsWith(']')){
                 const iPosOfLast = path.lastIndexOf('[');
-                index = parseInt( path.substring(iPosOfLast + 1, path.length - 2));
+                index = parseInt( path.substring(iPosOfLast + 1, path.length - 1));
                 path = path.substr(0, iPosOfLast);
             }
             const refs = path.split('.');
@@ -269,7 +269,6 @@ interface INameValuePair{
             const source = JSON.parse(splitHash[2], (key, value) => {
                 if (typeof value === 'string') {
                     if(key.endsWith(refKey)){
-
                         return this.getGlobalRef(value);
                     }else{
                         return value.replace(XtalInHash.stripRegEx, '');
@@ -338,7 +337,7 @@ interface INameValuePair{
                                 if (typeof target[key$] === 'object' && typeof val === 'object') {
                                     Object.assign(target[key$], val);
                                 } else {
-                                    target[key] = val;
+                                    target[key$] = val;
                                 }
                             }
                     }

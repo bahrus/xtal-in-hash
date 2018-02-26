@@ -105,9 +105,9 @@
             this._newRef = newVal;
             const array = XtalInHash.getGlobalRef(newVal.name, true);
             if (array && Array.isArray(array)) {
-                const path = newVal.name + '[' + array.length + ']';
+                const path = newVal.name + '[' + (array.length - 1) + ']';
                 array.push(newVal.value);
-                const newPath = newVal.name + '[' + array.length + ']';
+                const newPath = newVal.name + '[' + (array.length - 1) + ']';
                 this._win.location.hash = decodeURI(this._win.location.hash).replace(path, newPath);
             }
         }
@@ -200,7 +200,7 @@
             let index = null;
             if (path.endsWith(']')) {
                 const iPosOfLast = path.lastIndexOf('[');
-                index = parseInt(path.substring(iPosOfLast + 1, path.length - 2));
+                index = parseInt(path.substring(iPosOfLast + 1, path.length - 1));
                 path = path.substr(0, iPosOfLast);
             }
             const refs = path.split('.');
@@ -313,7 +313,7 @@
                                     Object.assign(target[key$], val);
                                 }
                                 else {
-                                    target[key] = val;
+                                    target[key$] = val;
                                 }
                             }
                     }

@@ -8,14 +8,25 @@
   <title>xtal-in-hash demo</title>
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
+  <script>
+      window.webHistory = {
+        JavaScript:[
+          {
+            version: "1.0",
+            release_date: "March 1996"
+          }
+        ]
+      }
+    </script>
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
   <script async src="../xtal-in-hash.js"></script>
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
   </custom-style>
+  
 </head>
 
 <body>
@@ -29,7 +40,13 @@
 
             <div>Message: [[message]]</div>
             Modify message:
-            <input type="textbox" value="{{message::input}}">
+            <input type="text" value="{{message::input}}">
+            Large reference Object (okay, not that large):
+            <div>Version: [[JSTimeline.version]]</div>
+            <div>Release Date: [[JSTimeline.release_date]]</div>
+            <input type="text" value="{{newVersion::input}}">
+            <input type="text" value="{{newReleaseDate::input}}">
+            <button on-click="addNew">Add New JavaScript Release</button>
           </template>
         </dom-module>
         <script>
@@ -40,8 +57,23 @@
                 message: {
                   type: String,
                   notify: true
+                },
+                newJavaScriptRelease:{
+                  type: Object,
+                  readOnly: true,
+                  notify: true
                 }
               }
+            }
+            addNew(){
+              this._setNewJavaScriptRelease({
+                name: 'webHistory.JavaScript',
+                value:{
+                  version: this.newVersion,
+                  release_date: this.newReleaseDate,
+                }
+                
+              })
             }
           }
           customElements.define(MyComponent.is, MyComponent);
@@ -53,13 +85,18 @@
           <my-component hash-tag></my-component>
         </xtal-in-hash>
         <div>Two way binding</div>
-        <xtal-in-hash bind child-props to-from location-hash>
-          <div>Instructions: Modify text in text below, watch it reflect in address bar. Refresh browser, notice the change persists</div>
-          <my-component hash-tag></my-component>
-        </xtal-in-hash>
+        <dom-bind>
+          <template>
+              <xtal-in-hash bind child-props to-from location-hash new-ref="[[newJS]]">
+                  <div>Instructions: Modify text in text below, watch it reflect in address bar. Refresh browser, notice the change persists</div>
+                  <my-component hash-tag new-java-script-release="{{newJS}}"></my-component>
+                </xtal-in-hash>
+          </template>
+        </dom-bind>
+        
         <script>
           if (window.location.hash.length <= 1) {
-            window.location.hash = 'json```{"message": "hello"}```';
+            window.location.hash = 'json```{"message": "hello", "JSTimeline.ref:":"webHistory.JavaScript[0]"}```';
           }
 
         </script>
