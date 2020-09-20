@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <iframe id=test src=blank.html></iframe>
+    <iframe id=test></iframe>
     <button onclick="doTest()">Click</button>
     <script>
 
@@ -14,7 +14,7 @@
             console.log(e);
         })
         function doTest(){
-            test.contentWindow.location.hash='testing';
+            test.contentWindow.location.hash='testing' + Math.random();
         }
         
     </script>
