@@ -6,9 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    <iframe id=test ></iframe>
+    <iframe id=test src=blank.html></iframe>
     <button onclick="doTest()">Click</button>
     <script>
+
+        test.contentWindow.addEventListener('hashchange', e => {
+            console.log(e);
+        })
         function doTest(){
             test.contentWindow.location.hash='testing';
         }
