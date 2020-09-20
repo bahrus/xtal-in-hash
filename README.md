@@ -5,7 +5,6 @@
 
 Allow location.hash to provide an object-based input channel for web components.  
 
-Because of the nature of this component, the best demo link to use is [this](http://rawgit.com/bahrus/xtal/master/bower_components/xtal-in-hash/demo/index.html).
 
 Client-side routing is great for describing paths to resources, following the REST paradigm.  It provides a nice string that can be shared to others, copy and pasted into an email or text message, or using the [web share](https://developers.google.com/web/updates/2016/09/navigator-share) api.  And did I mention that you  can refresh the browser, and see the state you were last in?  
 
@@ -24,6 +23,13 @@ Often we want to be able to send a snapshot of a particular application, after t
 It is also useful for development and testing if the properties of custom elements inside a page can be modified without touching the code.
 
 The last point may have inadvertently triggered a major spit-take, for which I apologize. This component, and the developer, need to be cognizant of how this feature could theoretically be abused, but every effort is made not to allow any abuse.
+
+**NB:**  An [effort](https://github.com/slightlyoff/history_api) is afoot to provide a standard for similar ideas.
+
+<details>
+    <summary>Tough (unsolvable?) problems</summary>
+
+</details>
 
 *xtal-in-hash* searches for, and listens to, the value of window.location.hash for a string inside these markers:
 
