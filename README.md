@@ -27,8 +27,18 @@ The last point may have inadvertently triggered a major spit-take, for which I a
 **NB:**  An [effort](https://github.com/slightlyoff/history_api) is afoot to provide a standard for similar ideas.
 
 <details>
+    <summary></summary>
+
+</details>
+
+<details>
     <summary>Tough (unsolvable?) problems</summary>
 
+1.  Preventing back button overload.
+2.  Support multiple stores with iframes -- how to synchronize iframe hash's with main address bar?
+3.  For large application with multiple stores via iframes, how to reduce churn of updating main address bar?
+4.  Updating main address bar and iframe means yet another back button sequence.
+5.  How to do a diff on the json, minimize changes?
 </details>
 
 *xtal-in-hash* searches for, and listens to, the value of window.location.hash for a string inside these markers:
